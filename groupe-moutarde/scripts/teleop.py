@@ -34,6 +34,9 @@ def move_command(data):
     elif min(obstacles[:100]) < 0.5:
         cmd.linear.x = 0.3
         cmd.angular.z = 0.5
+    elif min(obstacles[-100:]) < 0.5:
+        cmd.linear.x = 0.3
+        cmd.angular.z = -0.5
     else:
         cmd.linear.x = 0.3
     commandPublisher.publish(cmd)
