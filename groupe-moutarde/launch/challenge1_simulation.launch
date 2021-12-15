@@ -1,0 +1,7 @@
+<launch>
+    <!-- démarrer la simulation dans Gazebo et ajouter un robot -->
+    <include file="$(find larm)/launch/challenge-1.launch" />
+
+    <!-- contrôle du robot -->
+    <node name="controle" pkg="groupe-moutarde" type="teleop.py" />
+</launch>

@@ -1,0 +1,7 @@
+<launch>
+    <!-- lancer le laser - publication dans /scan -->
+    <node name="laser" pkg="urg_node" type="urg_node" />
+
+    <!-- contrôle du robot -->
+    <node name="controle" pkg="groupe-moutarde" type="teleop.py" />
+</launch>
