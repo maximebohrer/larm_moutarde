@@ -5,10 +5,17 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Point
 from sensor_msgs.msg import PointCloud 
 from sensor_msgs.msg import LaserScan
-from tf2_msgs.msg import TFMessage
 
 # Initialize ROS::node
 rospy.init_node('move', anonymous=True)
+
+v_a_max = 0.7
+v_l_max = 0.5
+
+tout_droit = 0
+tourne_gauche = 1
+tourne_droite = 2
+mode = tout_droit
 
 nuage = []
 
@@ -44,12 +51,13 @@ commandListener = rospy.Subscriber("/scan", LaserScan, perception)
 
 # Publish velocity commandes:
 def move_command(data):
+    global mode
+
     # Compute cmd_vel here and publish... (do not forget to reduce timer duration)
     cmd= Twist()
     mind = 3
     ming = 3
     
-    peut_avancer = True
     for i in nuage:
         if i.x > 0 and i.x < 0.3:
             if i.y < mind:
@@ -57,23 +65,32 @@ def move_command(data):
         if i.x < 0 and i.x > -0.3:
             if i.y < ming:
                 ming = i.y
-        #if nuage[i].x > -0.2 and nuage[i].x < 0.2 and nuage[i].y < 0.2:
-        #    peut_avancer = False
 
-    if mind < 0.15 or ming < 0.15:
-        cmd.angular.z = 2
+    cmd.linear.x = 0.4 * (min(mind, ming) - 0.15)
+    if cmd.linear.x < 0: cmd.linear.x = 0
+    if cmd.linear.x > v_l_max: cmd.linear.x = v_l_max
+
+    if mode == tourne_gauche and (mind < 0.4 or ming < 0.4):
+        cmd.angular.z = 1/v_a_max
+    
+    elif mode == tourne_droite and (mind < 0.4 or ming < 0.4):
+        cmd.angular.z = -1/v_a_max
+
     elif ming > mind:
+        mode = tourne_gauche
         cmd.angular.z = 1/mind
-        cmd.linear.x = 0.5 * mind
+        if cmd.angular.z > v_a_max: cmd.angular.z = v_a_max
+
     elif ming < mind:
+        mode = tourne_droite
         cmd.angular.z = -1/ming
-        cmd.linear.x = 0.5 * ming
+        if cmd.angular.z < -v_a_max: cmd.angular.z = -v_a_max
+
     else:
-        cmd.linear.x = 0.5 * mind
+        mode = tout_droit
         
     commandPublisher.publish(cmd)
-
-    cmd_rviz = TFMessage()
+    print(ming, mind)
     
 
 # call the move_command at a regular frequency:
