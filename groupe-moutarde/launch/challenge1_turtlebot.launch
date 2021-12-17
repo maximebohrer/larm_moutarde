@@ -9,4 +9,7 @@
     <node name="controle" pkg="groupe-moutarde" type="teleop2.py">
         <remap from="/cmd_vel" to="/cmd_vel_mux/input/navi" />
     </node>
+
+    <!-- rviz -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find groupe-moutarde)/launch/fichier_rviz.rviz" />
 </launch>

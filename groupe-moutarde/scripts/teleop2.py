@@ -46,14 +46,31 @@ commandListener = rospy.Subscriber("/scan", LaserScan, perception)
 def move_command(data):
     # Compute cmd_vel here and publish... (do not forget to reduce timer duration)
     cmd= Twist()
+    mind = 3
+    ming = 3
+    
     peut_avancer = True
-    for i in range(len(nuage)):
-        if nuage[i].x > -0.2 and nuage[i].x < 0.2 and nuage[i].y < 0.2:
-            peut_avancer = False
-    if peut_avancer:
-        cmd.linear.x = 1
-    else:
+    for i in nuage:
+        if i.x > 0 and i.x < 0.3:
+            if i.y < mind:
+                mind = i.y
+        if i.x < 0 and i.x > -0.3:
+            if i.y < ming:
+                ming = i.y
+        #if nuage[i].x > -0.2 and nuage[i].x < 0.2 and nuage[i].y < 0.2:
+        #    peut_avancer = False
+
+    if mind < 0.15 or ming < 0.15:
         cmd.angular.z = 2
+    elif ming > mind:
+        cmd.angular.z = 1/mind
+        cmd.linear.x = 0.5 * mind
+    elif ming > mind:
+        cmd.angular.z = 1/ming
+        cmd.linear.x = 0.5 * ming
+    else:
+        cmd.linear.x = 0.5 * mind
+        
     commandPublisher.publish(cmd)
 
     cmd_rviz = TFMessage()
