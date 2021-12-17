@@ -5,19 +5,14 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Point
 from sensor_msgs.msg import PointCloud 
 from sensor_msgs.msg import LaserScan
+from tf2_msgs.msg import TFMessage
 
 # Initialize ROS::node
 rospy.init_node('move', anonymous=True)
 
-v_a_max = 0.7
-v_l_max = 0.5
-
-tout_droit = 0
-tourne_gauche = 1
-tourne_droite = 2
-mode = tout_droit
-
 nuage = []
+fluid = 0
+savecmd = Twist()
 
 commandPublisher = rospy.Publisher(
     '/cmd_vel',
@@ -51,13 +46,13 @@ commandListener = rospy.Subscriber("/scan", LaserScan, perception)
 
 # Publish velocity commandes:
 def move_command(data):
-    global mode
-
     # Compute cmd_vel here and publish... (do not forget to reduce timer duration)
     cmd= Twist()
     mind = 3
     ming = 3
-    
+    global fluid
+    global savecmd
+
     for i in nuage:
         if i.x > 0 and i.x < 0.3:
             if i.y < mind:
@@ -66,31 +61,39 @@ def move_command(data):
             if i.y < ming:
                 ming = i.y
 
-    cmd.linear.x = 0.4 * (min(mind, ming) - 0.15)
-    if cmd.linear.x < 0: cmd.linear.x = 0
-    if cmd.linear.x > v_l_max: cmd.linear.x = v_l_max
-
-    if mode == tourne_gauche and (mind < 0.3 or ming < 0.3):
-        cmd.angular.z = v_a_max
-    
-    elif mode == tourne_droite and (mind < 0.3 or ming < 0.3):
-        cmd.angular.z = -v_a_max
-
-    elif ming > mind:
-        mode = tourne_gauche
-        cmd.angular.z = 1/mind
-        if cmd.angular.z > v_a_max: cmd.angular.z = v_a_max
-
-    elif ming < mind:
-        mode = tourne_droite
-        cmd.angular.z = -1/ming
-        if cmd.angular.z < -v_a_max: cmd.angular.z = -v_a_max
-
+    if mind < 0.15 or ming < 0.15:
+        cmd.angular.z = 2
+        fluid = 0
+    elif fluid != 0:
+        cmd = savecmd
+        fluid -= 1
     else:
-        mode = tout_droit
+        if ming < 3 and ming > mind:
+            cmd.angular.z = 1/mind
+            cmd.linear.x = 0.3 * mind
+            if cmd.angular.z > 2:
+                cmd.angular.z = 2
+
+            if ming < 0.3:
+                savecmd = cmd
+                fluid = 10
+
+        elif mind < 3 and ming < mind:
+            cmd.angular.z = -1/ming
+            cmd.linear.x = 0.3 * ming
+            if cmd.angular.z < -2: 
+                cmd.angular.z = -2
+            
+            if mind < 0.3:
+                savecmd = cmd
+                fluid = 10
+            
+        else:
+            cmd.linear.x = 0.3 * mind
         
     commandPublisher.publish(cmd)
-    print(ming, mind)
+
+    cmd_rviz = TFMessage()
     
 
 # call the move_command at a regular frequency:
