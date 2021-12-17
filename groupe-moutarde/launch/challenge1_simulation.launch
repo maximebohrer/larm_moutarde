@@ -3,5 +3,8 @@
     <include file="$(find larm)/launch/challenge-1.launch" />
 
     <!-- contrôle du robot -->
-    <node name="controle" pkg="groupe-moutarde" type="teleop.py" />
+    <node name="controle" pkg="groupe-moutarde" type="teleop2.py" />
+
+    <!-- rviz -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find groupe-moutarde)/launch/fichier_rviz.rviz" />
 </launch>
