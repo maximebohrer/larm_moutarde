@@ -1,9 +1,12 @@
 #!/usr/bin/python3
 
 import math, rospy, random
+import matplotlib.pyplot as plt
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 from tf2_msgs.msg import TFMessage
+
+plt.axis([0,1,0,10])
 
 # Initialize ROS::node
 rospy.init_node('move', anonymous=True)
@@ -18,12 +21,15 @@ commandPublisher = rospy.Publisher(
 def perception(data):
     global nuage
     nuage.clear
+    plt.clf()
     for i in range(len(data.ranges)):
         angle = data.angle_min + i * data.angle_increment
         x = math.sin(angle) * data.ranges[i]
         y = math.cos(angle) * data.ranges[i]
         if y > 0:
             nuage.append([x,y])
+            plt.scatter(x, y)
+    plt.pause(0.05)
 
 commandListener = rospy.Subscriber("/scan", LaserScan, perception)
 
