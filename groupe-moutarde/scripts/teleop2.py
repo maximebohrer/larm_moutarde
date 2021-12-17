@@ -2,6 +2,8 @@
 
 import math, rospy, random
 from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Point
+from sensor_msgs.msg import PointCloud 
 from sensor_msgs.msg import LaserScan
 from tf2_msgs.msg import TFMessage
 
@@ -15,33 +17,43 @@ commandPublisher = rospy.Publisher(
     Twist, queue_size=10
 )
 
+nuagePublisher = rospy.Publisher(
+    '/nuage',
+    PointCloud, queue_size=10
+)
+
 def perception(data):
     global nuage
-    nuage.clear
+    nuage = []
+    nu = PointCloud()
     for i in range(len(data.ranges)):
-        angle = data.angle_min + i * data.angle_increment
-        x = math.sin(angle) * data.ranges[i]
-        y = math.cos(angle) * data.ranges[i]
-        if y > 0:
-            nuage.append([x,y])
+        if data.ranges[i] > 0.05 and data.ranges[i] < 10:
+            angle = data.angle_min + i * data.angle_increment
+            p = Point()
+            p.x = -math.sin(angle) * data.ranges[i]
+            p.y = math.cos(angle) * data.ranges[i]
+            if p.y > 0:
+                nuage.append(p)
+    nu.points = nuage
+    nu.header.frame_id = "laser_sensor_link"
+    nuagePublisher.publish(nu)
+
 
 
 commandListener = rospy.Subscriber("/scan", LaserScan, perception)
-
-def peut_avancer():
-    for i in nuage:
-        if i[0] > -0.2 and i[0] < 0.2 and i[1] < 0.2:
-            return False
-    return True
 
 # Publish velocity commandes:
 def move_command(data):
     # Compute cmd_vel here and publish... (do not forget to reduce timer duration)
     cmd= Twist()
-    if peut_avancer():
-        cmd.linear.x = 0.1
+    peut_avancer = True
+    for i in range(len(nuage)):
+        if nuage[i].x > -0.2 and nuage[i].x < 0.2 and nuage[i].y < 0.2:
+            peut_avancer = False
+    if peut_avancer:
+        cmd.linear.x = 1
     else:
-        cmd.angular.z = 0.2
+        cmd.angular.z = 2
     commandPublisher.publish(cmd)
 
     cmd_rviz = TFMessage()

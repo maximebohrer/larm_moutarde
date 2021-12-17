@@ -7,4 +7,5 @@
 
     <!-- rviz -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find groupe-moutarde)/launch/fichier_rviz.rviz" />
+    <node name="rviz2" pkg="rviz" type="rviz" args="-d $(find groupe-moutarde)/launch/fichier_rviz2.rviz" />
 </launch>
