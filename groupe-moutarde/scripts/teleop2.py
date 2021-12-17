@@ -65,8 +65,8 @@ def move_command(data):
     elif ming > mind:
         cmd.angular.z = 1/mind
         cmd.linear.x = 0.5 * mind
-    elif ming > mind:
-        cmd.angular.z = 1/ming
+    elif ming < mind:
+        cmd.angular.z = -1/ming
         cmd.linear.x = 0.5 * ming
     else:
         cmd.linear.x = 0.5 * mind
