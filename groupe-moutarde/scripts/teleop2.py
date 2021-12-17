@@ -6,8 +6,6 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 from tf2_msgs.msg import TFMessage
 
-plt.axis([0,1,0,10])
-
 # Initialize ROS::node
 rospy.init_node('move', anonymous=True)
 
@@ -22,6 +20,7 @@ def perception(data):
     global nuage
     nuage.clear
     plt.clf()
+    plt.axis([-1,1,0,2])
     for i in range(len(data.ranges)):
         angle = data.angle_min + i * data.angle_increment
         x = math.sin(angle) * data.ranges[i]
