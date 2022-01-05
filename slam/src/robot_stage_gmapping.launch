@@ -16,7 +16,7 @@
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find slam)/src/fichier_rviz.rviz" />
 
     <!-- gmapping -->
-    <node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=base_scan"></node>
+    <node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=base_scan" />
 
     
 </launch>
