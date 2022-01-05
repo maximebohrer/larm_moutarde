@@ -11,10 +11,10 @@
     <node name="stage" pkg="stage_ros" type="stageros" args="$(find stage_ros)/world/willow-erratic.world" />
 
     <!-- rviz -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find stage_ros)/rviz/stage.rviz" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find slam)/src/fichier_rviz.rviz" />
 
     <!-- gmapping -->
-    <node name="gmapping" pkg="gmapping" type="slam_gmapping" />
+    <node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=base_scan"/>
 
     
 </launch>
