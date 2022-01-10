@@ -94,7 +94,7 @@ Visualization Manager:
       X std deviation: 0.5
       Y std deviation: 0.5
     - Class: rviz/SetGoal
-      Topic: /move_base_simple/goal
+      Topic: /goal
     - Class: rviz/PublishPoint
       Single click: true
       Topic: /clicked_point
@@ -139,4 +139,4 @@ Window Geometry:
     collapsed: false
   Width: 1267
   X: 298
-  Y: 108
+  Y: 71
