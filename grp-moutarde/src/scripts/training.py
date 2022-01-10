@@ -20,7 +20,7 @@ numimg = 0
 def perception(data):
     global img, c, numimg
     c+=1
-    if c==10:
+    if c==20:
         numimg +=1
         img = np.array(list(data.data), np.uint8)
         img = np.resize(img, (data.height, data.width, 3))
