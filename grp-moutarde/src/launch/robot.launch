@@ -1,0 +1,15 @@
+<launch>
+    <!-- <param name="/use_sim_time" value="true"/> -->
+
+    <!-- lancement robot -->
+    <include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
+
+    <!-- laser -->
+    <node name="laser" pkg="urg_node" type="urg_node"/>
+
+    <!-- lancement config ch2 -->
+    <include file="$(find grp-moutarde)/src/launch/challenge2.launch"/>
+
+    <node name="image_view" pkg="image_view" type="image_view" args="image:=camera/color/image_raw" />
+
+</launch>

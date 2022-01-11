@@ -17,8 +17,8 @@ img=np.array([[200,33,213]], np.uint8)
 rospy.init_node('training', anonymous=True)
 # chemin = rospy.__path__  #+ "src/scripts/cascade.xml"
 # print(chemin)
-bridge = CvBridge()
-object_cascade=cv2.CascadeClassifier("/home/grp-moutarde/catkin_ws/src/larm_moutarde/grp-moutarde/src/scripts/cascade1_deb.xml")
+#bridge = CvBridge()
+object_cascade=cv2.CascadeClassifier("/home/grp-moutarde/catkin_ws/src/larm_moutarde/grp-moutarde/src/scripts/cascade1_c.xml")
 
 #clignote = False
 # blinker = kobuki_led_controller.LedBlinker()
@@ -32,23 +32,20 @@ object_cascade=cv2.CascadeClassifier("/home/grp-moutarde/catkin_ws/src/larm_mout
 #     blinker.set_on_off
 
 def perception_img(data):
-    img = bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
+    #img = bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     object=object_cascade.detectMultiScale(gray, 1.2, minNeighbors=3)
     for (x,y,w,h) in object:
         cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255),2)
         #rospy.Timer(rospy.Duration(2),blink,oneshot=True)
-    cv2.imshow("img", img)
-    cv2.waitKey(33)
+    # cv2.imshow("img", img)
+    # cv2.waitKey(33)
 
-depth = 0
 def perception_depth(data):
-    global depth
     depth = bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
-    #depth = cv2.cvtColor(depth, cv2.COLOR_BGR2GRAY)
-    #cv2.imshow("depth", depth)
-    #cv2.waitKey(33)
+    cv2.imshow("depth", depth)
+    cv2.waitKey(33)
 
 
 

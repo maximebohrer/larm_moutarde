@@ -9,5 +9,7 @@
     <node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=scan" />
 
     <!-- caméra -->
-    <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="align_depth" value="true" />
+    </include>
 </launch>
