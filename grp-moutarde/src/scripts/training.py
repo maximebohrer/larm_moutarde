@@ -15,7 +15,7 @@ img=np.array([[0,0,0]], np.uint8)
 rospy.init_node('training', anonymous=True)
 
 c=0
-numimg = 0
+numimg = 800
 
 def perception(data):
     global img, c, numimg

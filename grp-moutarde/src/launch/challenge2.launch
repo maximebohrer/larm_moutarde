@@ -1,15 +1,14 @@
 <launch>
-    <!-- <param name="/use_sim_time" value="true"/> -->
+    <!--<param name="/use_sim_time" value="true"/>-->
 
     <!-- rviz -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grp-moutarde)/src/launch/fichier_rviz.rviz" />
-    <node name="link_laser" pkg="tf" type="static_transform_publisher" args="0.1 0 0 0 0 0 base_footprint laser 100"/>
     
     <!-- gmapping -->
     <node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=scan" />
 
-    <!-- caméra -->
-    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-        <arg name="align_depth" value="true" />
-    </include>
+    <!-- détection -->
+    <!--<node name="détec_b" pkg="grp-moutarde" type="scanop.py" output="screen" />-->
+    <node name="img_detect" pkg="image_view" type="image_view" args="image:=image_detection" />
+
 </launch>

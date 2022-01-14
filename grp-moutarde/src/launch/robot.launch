@@ -6,6 +6,12 @@
 
     <!-- laser -->
     <node name="laser" pkg="urg_node" type="urg_node"/>
+    <node name="link_laser" pkg="tf" type="static_transform_publisher" args="0.1 0 0 0 0 0 base_footprint laser 100"/>
+
+    <!-- caméra -->
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="align_depth" value="true" />
+    </include>
 
     <!-- lancement config ch2 -->
     <include file="$(find grp-moutarde)/src/launch/challenge2.launch"/>
