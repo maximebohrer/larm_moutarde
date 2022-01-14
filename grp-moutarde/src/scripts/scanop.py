@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from http import server
 from math import sqrt
 import rospy
 import numpy as np
@@ -72,8 +73,7 @@ class Node:
                 point = self.calculer_point_central(x, y, w, h, dist)
                 points.append(self.create_point_in_map_frame(point, stamp))
                 #print(x, y, w, h, dist, point)
-                self.publier_bouteille(point, stamp)
-            print("==================")
+                #self.publier_bouteille(point, stamp)
             self.update_led(len(objets_debouts))
             Bottle.update(points, stamp)
         
@@ -115,7 +115,7 @@ class Node:
         msg.header.stamp = stamp
         msg.header.frame_id = "camera_color_optical_frame"
         msg.point.x, msg.point.y, msg.point.z = point_in_camera_frame
-        return self.tf_listener.transformPoint("odom", msg)
+        return self.tf_listener.transformPoint("map", msg)
 
     def publier_bouteille(self, point, stamp):
         msg = Marker()
@@ -142,7 +142,7 @@ class Bottle:
     # Parameters
     required_detections = 10 # Number of detections required for a bottle to be listed
     max_alive_time = 20 # Max number of frames the bottle is kept alive for without being detected before it is listed
-    detection_distance = 0.5 # distance under which the bottles are considered the same
+    detection_distance = 0.1 # distance under which the bottles are considered the same
 
     # Bottle publisher
     publisher_bottle = rospy.Publisher('/bottle', Marker, queue_size=10)
@@ -195,7 +195,7 @@ class Bottle:
 
     def publish(self, stamp):
         msg = Marker()
-        msg.header.frame_id = "odom"
+        msg.header.frame_id = "map"
         msg.header.stamp = stamp
         msg.ns = "Bouteille"
         msg.id = self.id
@@ -207,12 +207,6 @@ class Bottle:
         msg.color.r, msg.color.g, msg.color.b, msg.color.a = [0, 255, 0, 255]
         #msg.lifetime.secs, msg.lifetime.nsecs = [2, 0]
         Bottle.publisher_bottle.publish(msg)
-        
-    def isABottleListed(self):
-        for b in Bottle.bottles:
-            if b.listed:
-                return true
-        return false
 
 # call the move_command at a regular frequency:
 #rospy.Timer(rospy.Duration(0.1), move_command, oneshot=False)
@@ -223,15 +217,15 @@ class Service:
     
     def bottle_srv(self,req):
         answer = ""
-        if Bottle.isABottleListed():
-            for bo in Bottle.bottles:
-                if bo.listed:
-                    answer += "Bouteille : " + bo.id + ", Postion (x,y,z) : " + str(bo.point.point))
-        else:
+        for bo in Bottle.bottles:
+            if bo.listed:
+                answer += "\n" + "Bouteille : " + str(bo.id) + ", x : " + str(bo.point.point.x) + ", y : " + str(bo.point.point.y) + ", z : " + str(bo.point.point.z)
+        if answer == "":
             answer = "Pas de Bouteille !"
-        return(false, "Liste des bouteilles : " + answer)
+        return (True, "Liste des bouteilles : " + answer)
 
 rospy.init_node('scanop', anonymous=True)
 node = Node()
+service = Service()
 print("Start scanop.py")
 rospy.spin()
