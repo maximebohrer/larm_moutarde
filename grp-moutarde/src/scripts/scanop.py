@@ -11,7 +11,7 @@ from cv_bridge import CvBridge
 from kobuki_msgs.msg import Led
 import tf
 import image_geometry
-
+from std_srvs.srv import SetBool
 
 # chemin = rospy.__path__  #+ "src/scripts/cascade.xml"
 # print(chemin)
@@ -200,9 +200,29 @@ class Bottle:
         msg.color.r, msg.color.g, msg.color.b, msg.color.a = [0, 255, 0, 255]
         #msg.lifetime.secs, msg.lifetime.nsecs = [2, 0]
         Bottle.publisher_bottle.publish(msg)
+        
+    def isABottleListed(self):
+        for b in Bottle.bottles:
+            if b.listed:
+                return true
+        return false
 
 # call the move_command at a regular frequency:
 #rospy.Timer(rospy.Duration(0.1), move_command, oneshot=False)
+
+class Service:
+    def __init__(self):
+        rospy.Service("Print_Bottle", SetBool, self.bottle_srv)
+    
+    def bottle_srv(self,req):
+        answer = ""
+        if Bottle.isABottleListed():
+            for bo in Bottle.bottles:
+                if bo.listed:
+                    answer += "Bouteille : " + bo.id + ", Postion (x,y,z) : " + str(bo.point.point))
+        else:
+            answer = "Pas de Bouteille !"
+        return(false, "Liste des bouteilles : " + answer)
 
 rospy.init_node('scanop', anonymous=True)
 node = Node()
