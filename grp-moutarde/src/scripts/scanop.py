@@ -35,6 +35,8 @@ class Node:
         # Publishers
         self.publisher_led = rospy.Publisher('/mobile_base/commands/led1', Led, queue_size=10)
         self.publisher_image = rospy.Publisher('/image_detection', Image, queue_size=10)
+        self.publisher_image_depth = rospy.Publisher('/image_detection_depth', Image, queue_size=10)
+        self.publisher_bouteilles = rospy.Publisher('/bottle', Marker, queue_size=10)
 
         # Listeners
         self.listener_img = rospy.Subscriber("/camera/color/image_raw", Image, self.perception_img)
@@ -45,39 +47,44 @@ class Node:
         self.tf_listener = tf.TransformListener()
 
     def perception_img(self, data):
-        self.img = self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
-        self.img_recue = True
+        if not self.img_recue:
+            self.img = self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
+            self.img_recue = True
         self.actualiser(data.header.stamp)
+            
 
     def perception_depth(self, data):
-        self.depth = self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
-        #cv2.imshow("depth", depth)
-        #cv2.waitKey(33)
-        self.depth_recue = True
+        if not self.depth_recue:
+            self.depth = self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
+            self.depth_recue = True
         self.actualiser(data.header.stamp)
+            
     
     def actualiser(self, stamp):
         if self.img_recue and self.depth_recue:
-            self.img_recue = False
-            self.depth_recue = False
             gray = cv2.cvtColor(self.img, cv2.COLOR_RGB2GRAY)
             objets_debouts = self.classifier_debouts.detectMultiScale(gray, 1.2, minNeighbors=3)
             points = []
             for (x, y, w, h) in objets_debouts:
                 cv2.rectangle(self.img, (x, y), (x+w, y+h), (0, 0, 255), 2)
+                cv2.rectangle(self.depth, (x, y), (x+w, y+h), (255, 255, 255), 2)
                 dist = self.trouver_distance(x, y, w, h)
                 point = self.calculer_point_central(x, y, w, h, dist)
                 points.append(self.create_point_in_map_frame(point, stamp))
                 #print(x, y, w, h, dist, point)
-                #self.publier_bouteille(point, stamp)
-            #print("==================")
+                self.publier_bouteille(point, stamp)
+            print("==================")
             self.update_led(len(objets_debouts))
             Bottle.update(points, stamp)
         
             image_detection = self.bridge.cv2_to_imgmsg(self.img, encoding="rgb8")
+            image_detection_depth = self.bridge.cv2_to_imgmsg(self.depth, encoding="16UC1")
             self.publisher_image.publish(image_detection)
+            self.publisher_image_depth.publish(image_detection_depth)
             #cv2.imshow("img", self.img)
             #cv2.waitKey(33)
+            self.img_recue = False
+            self.depth_recue = False
 
     def perception_caminfo(self, data):
         self.cam_info = data
