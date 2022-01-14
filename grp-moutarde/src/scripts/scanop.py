@@ -67,9 +67,9 @@ class Node:
                 cv2.rectangle(self.img, (x, y), (x+w, y+h), (0, 0, 255), 2)
                 dist = self.trouver_distance(x, y, w, h)
                 point = self.calculer_point_central(x, y, w, h, dist)
-                points.append(self.create_point_in_map_frame(point))
+                points.append(self.create_point_in_map_frame(point, stamp))
                 #print(x, y, w, h, dist, point)
-                self.publier_bouteille(point, stamp)
+                #self.publier_bouteille(point, stamp)
             #print("==================")
             self.update_led(len(objets_debouts))
             Bottle.update(points, stamp)
@@ -103,11 +103,12 @@ class Node:
             self.publisher_led.publish(msg)
     
     # Converts tuple in camera frame to PointStamped in map frame
-    def create_point_in_map_frame(self, point_in_camera_frame):
+    def create_point_in_map_frame(self, point_in_camera_frame, stamp):
         msg = PointStamped()
+        msg.header.stamp = stamp
         msg.header.frame_id = "camera_color_optical_frame"
         msg.point.x, msg.point.y, msg.point.z = point_in_camera_frame
-        return self.tf_listener.transformPoint("map", msg)
+        return self.tf_listener.transformPoint("odom", msg)
 
     def publier_bouteille(self, point, stamp):
         msg = Marker()
@@ -134,17 +135,17 @@ class Bottle:
     # Parameters
     required_detections = 10 # Number of detections required for a bottle to be listed
     max_alive_time = 20 # Max number of frames the bottle is kept alive for without being detected before it is listed
-    detection_distance = 0.1 # distance under which the bottles are considered the same
+    detection_distance = 0.5 # distance under which the bottles are considered the same
 
     # Bottle publisher
     publisher_bottle = rospy.Publisher('/bottle', Marker, queue_size=10)
 
     def __init__(self, point):
         Bottle.id_counter += 1
-        self.id = Bottle.idcounter
+        self.id = Bottle.id_counter
         self.point = point # PointStamped in map frame
         self.detection_counter = 0 # Number of times the bottle has been detected
-        self.alive_counter = 0 # Number of frames the bottle has been alive for
+        self.kill_countdown = 0 # Number of frames the bottle has been alive for
         self.listed = False # Stays False until the bottle has been detected enough times
     
     def modify(self, point, stamp):
@@ -152,40 +153,48 @@ class Bottle:
         if not self.listed:
             self.detection_counter += 1
             self.kill_countdown = 0
+            print(self.id, "nb detection", self.detection_counter)
             if self.detection_counter >= Bottle.required_detections:
                 self.listed = True
+                print(self.id, "listed")
         if self.listed:
             self.publish(stamp)
 
     def update(points, stamp):
         for p in points:
-            already_exits = False
+            already_exists = False
             for b in Bottle.bottles:
                 if b.distance_to(p) < Bottle.detection_distance:
                     b.modify(p, stamp)
+                    print(b.id, "updated")
                     already_exists = True
-            if not already_exits:
-                Bottle.bottles.append(p) # Creation of a new bottle if it does not already exists
+            if not already_exists:
+                new_bottle = Bottle(p)
+                Bottle.bottles.append(new_bottle) # Creation of a new bottle if it does not already exists
+                print(new_bottle.id, "created")
         
         for b in Bottle.bottles:
-            if not b.ok:
+            if not b.listed:
                 b.kill_countdown += 1
                 if b.kill_countdown >= Bottle.max_alive_time:
+                    print(b.id, "killed")
                     Bottle.bottles.remove(b)
+        
+        print("====================================")
 
     # Calculate the distance between the bottle and a PointStamped
     def distance_to(self, point):
-        return sqrt((self.point.point.x - point.x)**2 + (self.point.point.y - point.y)**2 + (self.point.point.z - point.z)**2)
+        return sqrt((self.point.point.x - point.point.x)**2 + (self.point.point.y - point.point.y)**2 + (self.point.point.z - point.point.z)**2)
 
     def publish(self, stamp):
         msg = Marker()
-        msg.header.frame_id = "camera_color_optical_frame"
+        msg.header.frame_id = "odom"
         msg.header.stamp = stamp
         msg.ns = "Bouteille"
         msg.id = self.id
         msg.type = 1
         msg.action = 0
-        msg.pose.position.x, msg.pose.position.y, msg.pose.position.z = self.point.x, self.point.y, self.point.z
+        msg.pose.position = self.point.point
         msg.pose.orientation.w = 1
         msg.scale.x, msg.scale.y, msg.scale.z = [0.1, 0.1, 0.1]
         msg.color.r, msg.color.g, msg.color.b, msg.color.a = [0, 255, 0, 255]

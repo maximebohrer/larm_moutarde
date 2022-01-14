@@ -2,7 +2,7 @@
     <!--<param name="/use_sim_time" value="true"/>-->
 
     <!-- rviz -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grp-moutarde)/src/launch/fichier_rviz.rviz" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grp-moutarde)/src/launch/config_ch2.rviz" />
     
     <!-- gmapping -->
     <node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=scan" />
