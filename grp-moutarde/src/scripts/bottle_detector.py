@@ -167,7 +167,7 @@ class Bottle:
         msg = Marker()
         msg.header.frame_id = "map"
         msg.header.stamp = stamp
-        msg.ns = "Bouteille"
+        msg.ns = "bottle"
         msg.id = self.id
         msg.type = 1
         msg.action = 0
