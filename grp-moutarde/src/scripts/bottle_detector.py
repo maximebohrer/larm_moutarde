@@ -15,8 +15,7 @@ class Node:
         rospack = rospkg.RosPack()
         self.pkg_path = rospack.get_path('grp-moutarde')
         self.bridge = CvBridge()
-        self.classifier_debouts = cv2.CascadeClassifier(self.pkg_path + "/src/scripts/cascade1_deb.xml")
-        #self.classifier_couches = cv2.CascadeClassifier("/home/grp-moutarde/Bureau/train_cascade/cascade3_c27.xml")
+        self.classifier_standing_bottles = cv2.CascadeClassifier(self.pkg_path + "/src/scripts/cascade1_deb.xml")
         self.cam_info = CameraInfo()
         self.nb_detections = 0
         self.working = False
@@ -45,9 +44,9 @@ class Node:
 
             # Detection in the frame and conversion to 3D coordinates
             gray = cv2.cvtColor(color_img, cv2.COLOR_RGB2GRAY)
-            objets_debouts = self.classifier_debouts.detectMultiScale(gray, 1.1, minNeighbors=3)
+            standing_bottles = self.classifier_standing_bottles.detectMultiScale(gray, 1.1, minNeighbors=3)
             points = []
-            for (x, y, w, h) in objets_debouts:
+            for (x, y, w, h) in standing_bottles:
                 dist = self.find_distance(depth_img, x, y, w, h)
                 h_times_dist = h * dist # The appearant height is inversely proportional to the distance, so h*dist is a constant. Comparing it to its expected value, which turns out to be between 140 and 180, gives us a way to filter out false alarms.
                 if h_times_dist >= 140 and h_times_dist <= 180:

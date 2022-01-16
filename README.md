@@ -55,7 +55,7 @@ We have used several technique in order to increase the precision of the bottle'
 
 5. The position of the bottle is streamed one and only one time
 
-See the "Keeping track of the bottles" paragraph. Each time a bottle is detected, its position is adjusted, by taking the average of the last few positions. By default, the marker is updated so that rviz can display it at the correct place: it is re-published with the SAME ID, so it is not new marker. If you want each marker to be published only one time, you can change the `publish_updates` variable to `False` in the `bottle_detector.py` script, line 108.
+See the "Keeping track of the bottles" paragraph. Each time a bottle is detected, its position is adjusted, by taking the average of the last few positions. By default, the marker is updated so that rviz can display it at the correct place: it is re-published with the SAME ID, so it is not new marker. If you want each marker to be published only one time, you can change the `publish_updates` variable to `False` in the `bottle_detector.py` script, line 106.
 
 6. All the bottles are detected
 
