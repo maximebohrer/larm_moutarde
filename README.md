@@ -11,7 +11,7 @@ Detection in the image
 
 To detect the bottles in an image from the camera, we trained a cascade classifier.
 
-Our model has been specically trained to recognize black bottles of Nuka Cola®. We used a cascade classifier with Local Bynary Patterns (LBP). We also generated our own large data base using the camera of the robot (intel realsense D435i) to obtain images as close as possible to the images that will be seen in the rosbag or by the robot.
+Our model has been specically trained to recognize black bottles of Nuka Cola®. We used a cascade classifier with Local Bynary Patterns (LBP). We also generated our own large data base using the camera of the robot (intel realsense D435i) to obtain images as close as possible to the images that will be seen in the rosbag or by the robot (The script we used to generate these images can be seen in `training.py`).
 
 
 Processing the data from the camera

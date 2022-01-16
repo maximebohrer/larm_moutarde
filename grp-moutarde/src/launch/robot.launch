@@ -20,8 +20,6 @@
     <node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=scan" />
 
     <!-- détection -->
-    <node name="détec_b" pkg="grp-moutarde" type="scanop.py" output="screen" />
-    <node name="img_detect" pkg="image_view" type="image_view" args="image:=image_detection" />
-    <node name="img_detect_depth" pkg="image_view" type="image_view" args="image:=image_detection_depth" />
+    <node name="bottle_detector" pkg="grp-moutarde" type="bottle_detector.py" output="screen" />
 
 </launch>

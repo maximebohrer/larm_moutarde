@@ -54,7 +54,6 @@ class Node:
                     cv2.rectangle(color_img, (x, y), (x+w, y+h), (0, 0, 255), 2)
                     point = self.find_center_point(camera_info, x, y, w, h, dist)
                     points.append(self.create_point_in_map_frame(point, color.header.stamp))
-                    print(h_times_dist)
             self.update_led(len(points))
 
             # Create and update the position of the bottles
