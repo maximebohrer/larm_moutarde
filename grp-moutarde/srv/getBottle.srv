@@ -1,8 +1,0 @@
-from std_srvs.srv import SetBool
-
-def bottle_srv(req):
-    global bottle_list
-    rep = ""
-    return(false,"Liste des bouteilles : " +  rep)
-
-rospy.Service("Print_Bottle,SetBool,bottle_srv)
