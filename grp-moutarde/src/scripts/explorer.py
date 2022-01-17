@@ -10,7 +10,7 @@ from sensor_msgs.msg import LaserScan
 rospy.init_node('move', anonymous=True)
 
 v_a_max = 0.4
-v_l_max = 1.4
+v_l_max = 0.8
 
 tout_droit = 0
 tourne_gauche = 1
@@ -22,7 +22,7 @@ vitesse_courante = 0
 acceleration = 0.03
 
 commandPublisher = rospy.Publisher(
-    '/cmd_vel',
+    '/cmd_vel_mux/input/navi',
     Twist, queue_size=10
 )
 
@@ -92,33 +92,13 @@ def move_command(data):
         cmd.angular.z = v_a_max
     elif mode == tourne_droite:
         cmd.angular.z = -v_a_max
-
-    # if mode == tourne_gauche and (mind < 0.3 or ming < 0.3):
-    #     cmd.angular.z = v_a_max
-    
-    # elif mode == tourne_droite and (mind < 0.3 or ming < 0.3):
-    #     cmd.angular.z = -v_a_max
-
-    # elif ming > mind:
-    #     mode = tourne_gauche
-    #     cmd.angular.z = 1/mind
-    #     if cmd.angular.z > v_a_max: cmd.angular.z = v_a_max
-
-    # elif ming < mind:
-    #     mode = tourne_droite
-    #     cmd.angular.z = -1/ming
-    #     if cmd.angular.z < -v_a_max: cmd.angular.z = -v_a_max
-
-    # else:
-    #     mode = tout_droit
         
     commandPublisher.publish(cmd)
-    print(ming, mind)
     
 
 # call the move_command at a regular frequency:
 rospy.Timer(rospy.Duration(0.1), move_command, oneshot=False)
 
 # spin() enter the program in a infinite loop
-print("Start teleop2.py")
+print("Start explorer.py")
 rospy.spin()

@@ -5,7 +5,7 @@ from visualization_msgs.msg import Marker
 from geometry_msgs.msg import PointStamped
 from sensor_msgs.msg import Image, CameraInfo
 from cv_bridge import CvBridge
-from kobuki_msgs.msg import Led
+from kobuki_msgs.msg import Led, Sound
 from std_srvs.srv import Trigger
 from math import sqrt, inf
 
@@ -105,8 +105,9 @@ class Bottle:
     detection_distance = 0.35           # distance under which the bottles are considered the same
     publish_updates = True              # Each time a bottle is detected, its position is adjusted. This variable determines if those adjustments should be published. If false, the marker will only be sent once. If true, the marker will be updated (re-published withe the SAME ID) each time the bottle is detected.
 
-    # Bottle publisher
+    # Publishers
     publisher_bottle = rospy.Publisher('/bottle', Marker, queue_size=10)
+    publisher_sound = rospy.Publisher('/mobile_base/commands/sound', Sound, queue_size=10)
 
     # Creation of a new bottle
     def __init__(self, point):
@@ -130,6 +131,7 @@ class Bottle:
             if self.detection_counter >= Bottle.required_detections:
                 self.listed = True
                 self.publish(stamp)
+                Bottle.beep()
         elif Bottle.publish_updates:
             self.publish(stamp)
 
@@ -185,6 +187,12 @@ class Bottle:
             if b.listed:
                 bottles.append(b.point)
         return bottles
+    
+    # Sound
+    def beep():
+        msg = Sound()
+        msg.value = msg.ON
+        Bottle.publisher_sound.publish(msg)
 
 
 class Service:

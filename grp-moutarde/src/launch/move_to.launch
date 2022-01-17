@@ -4,7 +4,7 @@
 
   <!-- laser -->
   <node name="laser" pkg="urg_node" type="urg_node"/>
-  <node name="link_laser" pkg="tf" type="static_transform_publisher" args="0.1 0 0 0 0 0 base_footprint laser 100"/>
+  <!--<node name="link_laser" pkg="tf" type="static_transform_publisher" args="0.1 0 0 0 0 0 base_link laser 100"/>-->
 
   <!-- Run the map server -->
   <node name="map_server" pkg="map_server" type="map_server" args="$(find grp-moutarde)/src/arena.yaml" />
@@ -13,7 +13,14 @@
   <node name="amcl" pkg="amcl" type="amcl" args="scan:=scan" />
 
   <!-- Navigation using MoveBase -->
-  <node name="move_base" pkg="move_base" type="move_base" />
+  <node name="move_base" pkg="move_base" type="move_base">
+    <rosparam file="$(find grp-moutarde)/src/costmap.yaml" command="load" ns="global_costmap" /> 
+    <rosparam file="$(find grp-moutarde)/src/costmap.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find grp-moutarde)/src/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find grp-moutarde)/src/global_costmap_params.yaml" command="load" /> 
+    <rosparam file="$(find grp-moutarde)/src/base_local_planner_params.yaml" command="load" />
+    <remap from="/cmd_vel" to="/cmd_vel_mux/input/navi" />
+  </node>
 
   <!-- Rviz -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grp-moutarde)/src/launch/config_move_to.rviz" />
