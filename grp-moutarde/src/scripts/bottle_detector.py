@@ -102,7 +102,7 @@ class Bottle:
     # Parameters
     required_detections = 4             # Number of detections required for a bottle to be listed
     max_alive_time = 4                  # Max number of frames the bottle is kept alive for without being detected before it is listed
-    detection_distance = 0.3            # distance under which the bottles are considered the same
+    detection_distance = 0.35           # distance under which the bottles are considered the same
     publish_updates = True              # Each time a bottle is detected, its position is adjusted. This variable determines if those adjustments should be published. If false, the marker will only be sent once. If true, the marker will be updated (re-published withe the SAME ID) each time the bottle is detected.
 
     # Bottle publisher
