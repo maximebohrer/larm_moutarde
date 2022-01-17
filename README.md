@@ -1,4 +1,4 @@
-LARM - Moutarde - Channenge 2
+LARM - Moutarde - Challenge 3
 =============================
 
 The goal of the challenge is to demonstrate the capability the robot has to map an environment and to retrieve specific objects on it.
