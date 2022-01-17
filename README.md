@@ -1,9 +1,10 @@
-LARM - Moutarde - Channenge 2
+LARM - Moutarde - Channenge 3
 =============================
 
 The goal of the challenge is to demonstrate the capability the robot has to map an environment and to retrieve specific objects on it.
  
-/!\ The project depends on `mb6-tbot`
+/!\ The project depends on `mb6-tbot`, `AMCL`, `Move Base` and `MapServer`.
+
 
 
 Detection in the image
