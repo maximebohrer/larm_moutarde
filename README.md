@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 LARM - Moutarde - Channenge 3
 =============================
 
