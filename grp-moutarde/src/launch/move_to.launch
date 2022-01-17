@@ -1,0 +1,21 @@
+<launch>
+  <!-- Bringup the robot -->
+  <include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
+
+  <!-- laser -->
+  <node name="laser" pkg="urg_node" type="urg_node"/>
+  <node name="link_laser" pkg="tf" type="static_transform_publisher" args="0.1 0 0 0 0 0 base_footprint laser 100"/>
+
+  <!-- Run the map server -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find grp-moutarde)/src/arena.yaml" />
+
+  <!-- Localization using AMCL -->
+  <node name="amcl" pkg="amcl" type="amcl" args="scan:=scan" />
+
+  <!-- Navigation using MoveBase -->
+  <node name="move_base" pkg="move_base" type="move_base" />
+
+  <!-- Rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grp-moutarde)/src/launch/config_move_to.rviz" />
+
+</launch>
