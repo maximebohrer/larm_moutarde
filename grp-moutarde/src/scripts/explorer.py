@@ -10,7 +10,7 @@ from sensor_msgs.msg import LaserScan
 rospy.init_node('move', anonymous=True)
 
 v_a_max = 0.4
-v_l_max = 0.8
+v_l_max = 0.3
 
 tout_droit = 0
 tourne_gauche = 1

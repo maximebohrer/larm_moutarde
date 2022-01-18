@@ -4,10 +4,10 @@
 
   <!-- laser -->
   <node name="laser" pkg="urg_node" type="urg_node"/>
-  <!--<node name="link_laser" pkg="tf" type="static_transform_publisher" args="0.1 0 0 0 0 0 base_link laser 100"/>-->
+  <node name="link_laser" pkg="tf" type="static_transform_publisher" args="0.1 0 0 0 0 0 base_link laser 100"/>
 
   <!-- Run the map server -->
-  <node name="map_server" pkg="map_server" type="map_server" args="$(find grp-moutarde)/src/arena.yaml" />
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find grp-moutarde)/src/demi-arene.yaml" />
 
   <!-- Localization using AMCL -->
   <node name="amcl" pkg="amcl" type="amcl" args="scan:=scan" />

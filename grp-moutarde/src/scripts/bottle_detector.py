@@ -16,7 +16,6 @@ class Node:
         self.pkg_path = rospack.get_path('grp-moutarde')
         self.bridge = CvBridge()
         self.classifier_standing_bottles = cv2.CascadeClassifier(self.pkg_path + "/src/scripts/cascade1_deb.xml")
-        self.cam_info = CameraInfo()
         self.nb_detections = 0
         self.working = False
 

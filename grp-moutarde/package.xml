@@ -2,11 +2,11 @@
 <package format="2">
   <name>grp-moutarde</name>
   <version>1.0.0</version>
-  <description>The grp-moutarde package for the challenge 2 of UV-LARM</description>
+  <description>The grp-moutarde package for the challenge 3 of UV-LARM</description>
   <maintainer email="nathanael.lesdalons@etu.imt-nord-europe.fr">Nathanaël Lesdalons</maintainer>
   <maintainer email="maxime.bohrer@etu.imt-nord-europe.fr">Maxime Bohrer</maintainer>
   <license>IMT</license>
-  <url type="website">https://github.com/maximebohrer/larm_moutarde/tree/challenge2</url>
+  <url type="website">https://github.com/maximebohrer/larm_moutarde/tree/challenge3</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
