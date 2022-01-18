@@ -1,0 +1,4 @@
+<launch>
+  <!-- démarrer la simulation dans Gazebo et ajouter un robot -->
+  <include file="$(find larm)/launch/challenge-1.launch" />
+</launch>
