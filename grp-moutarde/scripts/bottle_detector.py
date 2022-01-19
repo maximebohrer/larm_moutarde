@@ -3,7 +3,7 @@
 import rospy, rospkg, cv2, numpy as np, tf, image_geometry, message_filters
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import PointStamped
-from sensor_msgs.msg import Image, CameraInfo
+from sensor_msgs.msg import Image, CameraInfo, PointCloud
 from cv_bridge import CvBridge
 from kobuki_msgs.msg import Led, Sound
 from std_srvs.srv import Trigger
@@ -48,7 +48,7 @@ class Node:
             for (x, y, w, h) in standing_bottles:
                 dist = self.find_distance(depth_img, x, y, w, h)
                 h_times_dist = h * dist # The appearant height is inversely proportional to the distance, so h*dist is a constant. Comparing it to its expected value, which turns out to be between 140 and 180, gives us a way to filter out false alarms.
-                if h_times_dist >= 140 and h_times_dist <= 180:
+                if True or h_times_dist >= 140 and h_times_dist <= 180:
                     cv2.rectangle(color_img, (x, y), (x+w, y+h), (0, 0, 255), 2)
                     point = self.find_center_point(camera_info, x, y, w, h, dist)
                     points.append(self.create_point_in_map_frame(point, color.header.stamp))
@@ -106,6 +106,7 @@ class Bottle:
 
     # Publishers
     publisher_bottle = rospy.Publisher('/bottle', Marker, queue_size=10)
+    publisher_obstacles = rospy.Publisher('/bottle_obstacles', PointCloud, queue_size=10)
     publisher_sound = rospy.Publisher('/mobile_base/commands/sound', Sound, queue_size=10)
 
     # Creation of a new bottle
@@ -193,9 +194,14 @@ class Bottle:
         msg.value = msg.ON
         Bottle.publisher_sound.publish(msg)
     
-    def publish_obstacles():
-        stamp = rospy.get_rostime()
-        
+    def publish_obstacles(event):
+        msg = PointCloud()
+        msg.header.stamp = rospy.get_rostime()
+        msg.header.frame_id = "map"
+        for b in Bottle.bottles:
+            if b.listed:
+                msg.points.append(b.point.point)
+        Bottle.publisher_obstacles.publish(msg)
 
 
 class Service:

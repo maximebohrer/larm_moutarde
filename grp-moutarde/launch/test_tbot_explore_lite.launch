@@ -1,0 +1,67 @@
+<launch>
+  <!-- Using tbot_bringup start.launch -->
+  <!-- Kobuki base -->
+  <arg name="urdf_file" default="$(find xacro)/xacro '$(find tbot_description)/urdf/tbot.urdf.xacro'" />
+  <param name="robot_description" command="$(arg urdf_file)" />
+  <include file="$(find kobuki_node)/launch/minimal.launch"/>
+  <node pkg="tf" type="static_transform_publisher" name="base_link_in_base_footprint"
+    args="0.0 0.0 0.1 0.0 0.0 0.0 /base_footprint /base_link 80" />
+
+  <!-- Laser : modified angle comparred to the original file -->
+  <node name="robot_scan" pkg="urg_node" type="urg_node" >
+    <param name="frame_id" value="laser_link"/>
+    <param name="angle_min" value="-1.6"/>
+    <param name="angle_max" value="1.6"/>
+  </node>
+  <node pkg="tf" type="static_transform_publisher" name="laser_in_base_link"
+    args="0.2 0.0 0.05 0.0 0.0 0.0 /base_link /laser_link 80" />
+  
+  <!-- Realsense -->
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <arg name="align_depth" value="true" />
+  </include>
+  <node pkg="tf" type="static_transform_publisher" name="camera_in_base_link"
+    args="0.2 0.0 0.1 0.0 0.0 0.0 /base_link /camera_link 80" />
+  <!-- End of tbot_bringup Start.launch -->
+
+  <!-- velocity commands multiplexer -->
+  <node pkg="nodelet" type="nodelet" name="cmd_vel_mux" args="load yocs_cmd_vel_mux/CmdVelMuxNodelet mobile_base_nodelet_manager">
+    <param name="yaml_cfg_file" value="$(find turtlebot_bringup)/param/mux.yaml"/>
+    <remap from="cmd_vel_mux/output" to="mobile_base/commands/velocity"/>
+  </node>
+
+  <!-- Run Gmapping -->
+  <node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=scan" />
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find grp-moutarde)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find grp-moutarde)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />   
+    <rosparam file="$(find grp-moutarde)/param/local_costmap_params.yaml" command="load" />   
+    <rosparam file="$(find grp-moutarde)/param/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find grp-moutarde)/param/dwa_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find grp-moutarde)/param/move_base_params.yaml" command="load" />
+    <rosparam file="$(find grp-moutarde)/param/global_planner_params.yaml" command="load" />
+    <rosparam file="$(find grp-moutarde)/param/navfn_global_planner_params.yaml" command="load" />
+    
+    <!-- reset frame_id parameters using user input data -->
+    <param name="global_costmap/global_frame" value="map"/>
+    <param name="global_costmap/robot_base_frame" value="base_footprint"/>
+    <param name="local_costmap/global_frame" value="map"/>
+    <param name="local_costmap/robot_base_frame" value="base_footprint"/>
+    <param name="DWAPlannerROS/global_frame_id" value="odom"/>
+
+    <remap from="cmd_vel" to="cmd_vel_mux/input/navi"/>
+    <remap from="odom" to="odom"/>
+    <remap from="scan" to="scan"/>
+  </node>
+
+  <!-- Rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grp-moutarde)/launch/config_move_to.rviz" />
+  
+  <!-- détection -->
+  <node name="bottle_detector" pkg="grp-moutarde" type="bottle_detector.py" output="screen" />
+
+  <!-- mouvement -->
+  <!--<include file="$(find explore_lite)/launch/explore_costmap.launch" /> -->
+
+</launch>
