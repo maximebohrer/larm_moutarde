@@ -129,11 +129,18 @@ class Bottle:
             self.detection_counter += 1
             self.kill_countdown = 0
             if self.detection_counter >= Bottle.required_detections:
-                self.listed = True
-                self.publish(stamp)
-                Bottle.beep()
+                self.validate(stamp)
         elif Bottle.publish_updates:
             self.publish(stamp)
+    
+    # Function that runs once a bottle has been detected enough times
+    def validate(self, stamp):
+        self.listed = True
+        self.publish(stamp)
+        print("[Bottle detector] New bottle found! (id " + self.id + ") There are now " + len(Bottle.bottles) + " bottles")
+        msg = Sound()
+        msg.value = msg.ON
+        Bottle.publisher_sound.publish(msg)
 
     # Static function which runs each frame. The points variable contains all the PointStamped detected in the current frame.
     def update(points, stamp):
@@ -187,12 +194,6 @@ class Bottle:
             if b.listed:
                 bottles.append(b.point)
         return bottles
-    
-    # Sound
-    def beep():
-        msg = Sound()
-        msg.value = msg.ON
-        Bottle.publisher_sound.publish(msg)
     
     def publish_obstacles(event):
         msg = PointCloud()
