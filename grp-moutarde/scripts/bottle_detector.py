@@ -15,7 +15,7 @@ class Node:
         rospack = rospkg.RosPack()
         self.pkg_path = rospack.get_path('grp-moutarde')
         self.bridge = CvBridge()
-        self.classifier_standing_bottles = cv2.CascadeClassifier(self.pkg_path + "/src/scripts/cascade1_deb.xml")
+        self.classifier_standing_bottles = cv2.CascadeClassifier(self.pkg_path + "/scripts/cascade1_deb.xml")
         self.nb_detections = 0
         self.working = False
 
@@ -192,6 +192,10 @@ class Bottle:
         msg = Sound()
         msg.value = msg.ON
         Bottle.publisher_sound.publish(msg)
+    
+    def publish_obstacles():
+        stamp = rospy.get_rostime()
+        
 
 
 class Service:
@@ -209,5 +213,6 @@ class Service:
 rospy.init_node('bottle_detector', anonymous=True)
 node = Node()
 service = Service()
+timer = rospy.Timer(rospy.Duration(0.1), Bottle.publish_obstacles, oneshot=False)
 print("Start bottle_detector.py")
 rospy.spin()
