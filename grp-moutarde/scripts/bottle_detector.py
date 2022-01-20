@@ -48,7 +48,7 @@ class Node:
             for (x, y, w, h) in standing_bottles:
                 dist = self.find_distance(depth_img, x, y, w, h)
                 h_times_dist = h * dist # The appearant height is inversely proportional to the distance, so h*dist is a constant. Comparing it to its expected value, which turns out to be between 140 and 180, gives us a way to filter out false alarms.
-                if True or h_times_dist >= 140 and h_times_dist <= 180:
+                if h_times_dist >= 140 and h_times_dist <= 180:
                     cv2.rectangle(color_img, (x, y), (x+w, y+h), (0, 0, 255), 2)
                     point = self.find_center_point(camera_info, x, y, w, h, dist)
                     points.append(self.create_point_in_map_frame(point, color.header.stamp))
@@ -137,7 +137,7 @@ class Bottle:
     def validate(self, stamp):
         self.listed = True
         self.publish(stamp)
-        print("[Bottle detector] New bottle found! (id " + self.id + ") There are now " + len(Bottle.bottles) + " bottles")
+        print("[Bottle detector] New bottle found! (id " + str(self.id) + ") There are now " + str(len(Bottle.bottles)) + " bottles")
         msg = Sound()
         msg.value = msg.ON
         Bottle.publisher_sound.publish(msg)
