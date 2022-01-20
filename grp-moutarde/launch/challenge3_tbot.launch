@@ -6,6 +6,11 @@
   <include file="$(find kobuki_node)/launch/minimal.launch"/>
   <node pkg="tf" type="static_transform_publisher" name="base_link_in_base_footprint"
     args="0.0 0.0 0.1 0.0 0.0 0.0 /base_footprint /base_link 80" />
+    <!-- velocity commands multiplexer -->
+  <node pkg="nodelet" type="nodelet" name="cmd_vel_mux" args="load yocs_cmd_vel_mux/CmdVelMuxNodelet mobile_base_nodelet_manager">
+    <param name="yaml_cfg_file" value="$(find turtlebot_bringup)/param/mux.yaml"/>
+    <remap from="cmd_vel_mux/output" to="mobile_base/commands/velocity"/>
+  </node>
 
   <!-- Laser -->
   <node name="robot_scan" pkg="urg_node" type="urg_node" >
@@ -22,12 +27,6 @@
   </include>
   <node pkg="tf" type="static_transform_publisher" name="camera_in_base_link"
     args="0.2 0.0 0.1 0.0 0.0 0.0 /base_link /camera_link 80" />
-
-  <!-- velocity commands multiplexer -->
-  <node pkg="nodelet" type="nodelet" name="cmd_vel_mux" args="load yocs_cmd_vel_mux/CmdVelMuxNodelet mobile_base_nodelet_manager">
-    <param name="yaml_cfg_file" value="$(find turtlebot_bringup)/param/mux.yaml"/>
-    <remap from="cmd_vel_mux/output" to="mobile_base/commands/velocity"/>
-  </node>
 
   <!-- Run Gmapping -->
   <node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=scan" />
