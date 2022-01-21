@@ -30,14 +30,11 @@ class Node:
             message_filters.Subscriber("/camera/color/camera_info", CameraInfo)
             ], 10)
         self.camera_listener.registerCallback(self.callback)
-
-        # TF listener
-        self.tf_listener = tf.TransformListener()
     
     # This functions gets called each time data is received from the camera. The TimeSynchronizer takes care of using 3 messages which have the same time stamp.
     def callback(self, color, depth, camera_info):
         if not self.working:
-            self.working = True
+            #self.working = True
             color_img = self.bridge.imgmsg_to_cv2(color, desired_encoding='passthrough')
             depth_img = self.bridge.imgmsg_to_cv2(depth, desired_encoding='passthrough')
 
@@ -81,7 +78,7 @@ class Node:
         msg.header.stamp = stamp
         msg.header.frame_id = "camera_color_optical_frame"
         msg.point.x, msg.point.y, msg.point.z = point_in_camera_frame
-        return self.tf_listener.transformPoint("map", msg)
+        return tf_listener.transformPoint("map", msg)
 
     # Light up the robot LED if bottles are detected
     def update_led(self, nb):
@@ -197,11 +194,20 @@ class Bottle:
     
     def publish_obstacles(event):
         msg = PointCloud()
-        msg.header.stamp = rospy.get_rostime()
-        msg.header.frame_id = "map"
+        current_time = rospy.get_rostime()
+        msg.header.stamp = current_time
+        msg.header.frame_id = "base_footprint"
         for b in Bottle.bottles:
             if b.listed:
-                msg.points.append(b.point.point)
+                try:
+                    point = PointStamped()
+                    point.point = b.point.point
+                    point.header.frame_id = "map"
+                    point = tf_listener.transformPoint("base_footprint", point)
+                    msg.points.append(point.point)
+                except Exception as e:
+                    print(str(e))
+
         Bottle.publisher_obstacles.publish(msg)
 
 
@@ -220,6 +226,7 @@ class Service:
 rospy.init_node('bottle_detector', anonymous=True)
 node = Node()
 service = Service()
+tf_listener = tf.TransformListener()
 timer = rospy.Timer(rospy.Duration(0.1), Bottle.publish_obstacles, oneshot=False)
 print("Start bottle_detector.py")
 rospy.spin()
