@@ -66,8 +66,8 @@
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grp-moutarde)/launch/config_move_to.rviz" />
 
   <!-- Exploration -->
-  <include file="$(find explore_lite)/launch/explore_costmap.launch"/>
-  <!-- <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen">
+  <!--<include file="$(find explore_lite)/launch/explore_costmap.launch"/>-->
+  <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen" if="$(arg simulation)">
     <param name="robot_base_frame" value="base_link"/>
     <param name="costmap_topic" value="move_base/global_costmap/costmap"/>
     <param name="costmap_updates_topic" value="move_base/global_costmap/costmap_updates"/>
@@ -79,6 +79,8 @@
     <param name="gain_scale" value="1.0"/>
     <param name="transform_tolerance" value="0.3"/>
     <param name="min_frontier_size" value="0.5"/>
-  </node> -->
+  </node>
 
+  <!-- Bottle detector -->
+  <node pkg="grp-moutarde" type="bottle_detector.py" name="bottle_detector" unless="$(arg simulation)" />
 </launch>
