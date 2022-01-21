@@ -5,7 +5,7 @@ The goal of the challenge is to demonstrate the capability the robot has to map 
  
 /!\ The project depends on `mb6-tbot`, `AMCL`, `Move Base` and `MapServer`.
 
-
+à dire : grande tolérence mais si 2 bouteilles dans meme image etc
 
 Detection in the image
 ----------------------
