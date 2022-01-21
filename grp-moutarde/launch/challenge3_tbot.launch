@@ -71,7 +71,6 @@
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grp-moutarde)/launch/config_move_to.rviz" />
 
   <!-- Exploration -->
-  <!--<include file="$(find explore_lite)/launch/explore_costmap.launch"/>-->
   <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen" if="$(arg simulation)">
     <param name="robot_base_frame" value="base_link"/>
     <param name="costmap_topic" value="move_base/global_costmap/costmap"/>
