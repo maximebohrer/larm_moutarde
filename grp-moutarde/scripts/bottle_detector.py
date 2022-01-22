@@ -98,7 +98,7 @@ class Bottle:
     # Parameters
     required_detections = 4             # Number of detections required for a bottle to be listed
     max_alive_time = 4                  # Max number of frames the bottle is kept alive for without being detected before it is listed
-    detection_distance = 0.35           # distance under which the bottles are considered the same
+    distance_tolerance = 0.35           # distance under which the bottles are considered the same
     publish_updates = True              # Each time a bottle is detected, its position is adjusted. This variable determines if those adjustments should be published. If false, the marker will only be sent once. If true, the marker will be updated (re-published withe the SAME ID) each time the bottle is detected.
 
     # Publishers
@@ -149,7 +149,7 @@ class Bottle:
                 if dist < lowest_dist:
                     lowest_dist = dist
                     nearest_point = p
-            if lowest_dist < Bottle.detection_distance:
+            if lowest_dist < Bottle.distance_tolerance:
                 b.modify(nearest_point, stamp)          # This point is considered to correspond to an existing bottle. The bottle is adjusted with the coordinates of the new point.
                 points.remove(nearest_point)            # Do not compare this point again to the next bottles. That way if multiple points are detected in one frame, they will all necessarily be treated as different bottles, even if they are close.
 
@@ -192,6 +192,7 @@ class Bottle:
                 bottles.append(b.point)
         return bottles
     
+    # Static function that runs with a ROS timer and publishes the list of obstacles to avoid
     def publish_obstacles(event):
         msg = PointCloud()
         current_time = rospy.get_rostime()

@@ -2,10 +2,6 @@ LARM - Moutarde - Channenge 3
 =============================
 
 The goal of the challenge is to demonstrate the capability the robot has to map an environment, to navigate it autonomously, and to retrieve specific objects in it.
- 
-
-à dire : grande tolérence mais si 2 bouteilles dans meme image etc
-la laser est trop haut pour les bouteilles dont on envoie dans un topic
 
 
 Dependencies
@@ -27,7 +23,9 @@ sudo apt install ros-noetic-explore-lite
 Autonomous navigation
 ---------------------
 
-We decided to use `move_base` from ROS' navigation stack in order for the robot to move autonomously in the arena. We also used the `dwa_local_planner` to replace move_base's default local planner as it works way better in our experience. We configured the global planner so that you can make the robot explore unknown areas, and it will adjust its path along the way as it detects new walls and obstacles. That way, you can make the robot explore its environment easily by sending it goals through Rviz, even if it does not know the map yet.
+We decided to use `gmapping` and `move_base` from ROS's navigation stack in order for the robot to move autonomously in the arena. We also used the `dwa_local_planner` to replace move_base's default local planner as it works way better in our experience. We configured the global planner so that you can make the robot explore unknown areas, and it will adjust its path along the way as it detects new walls and obstacles. That way, you can make the robot explore its environment easily by sending it goals through Rviz, even if it does not know the map yet.
+
+The global costmap is generated using gmapping's map. The obstacles are inflated by the radius of the robot. This is the area that the robot must not enter under any circumstances. Otherwise a collision will be unavoidable. This region is displayed in light blue in Rviz. The obstacles are further inflated, but this time with a gradient pattern: the closer the area is to an obstacle, the less likely global and local planners are to plan paths there. The local costmap does the exact same thing but takes its data from the laser and overrules the global costmap. That way the robot can react in real time to the obstacles. The two costmaps and the planned paths are displayed in Rviz.
 
 `explore_lite` is a ROS package that works with move_base. It determines the best goal to go explore in order to map the environment in the most efficient way possible. The goals are sent to move_base and the robot keeps exploring until the whole environment has been mapped. As you will see, it works really well in the simulation, but we had trouble making it work in small cluttered places like the arena. That is why we only enabled it for the simulation.
 
@@ -43,57 +41,33 @@ Our model has been specically trained to recognize black bottles of Nuka Cola®.
 Processing the data from the camera
 -----------------------------------
 
-First, the distance from the camera to the bottle is calculated using the depth image. Then, the 3D coordinates of central point of the bottle in the camera frame is calculated using ROS' image_geometry library. Finally, the coordinates are converted in the map frame using the transformations published on tf.
+First, the python script receives the color and depth images from the camera. They are converted into usable images objects using the `cv_bridge` library. Then, our model is applied to the color image using OpenCV to get the positions and sizes of all the bottles found in the picture. To find the distance between the camera and the bottle, we take a small rectangle in the middle of the bottle in the depth image (using the same position and size that have been found on the color image, but on the depth image, which has been aligned to the color image by the camera). We then take the median value of this small rectangle. This ensures that the calculated depth is not affected by extreme values, like some pixels from the background, or parasites. Finally, we add about half of the diameter of the bottle to the depth, to obtain the distance from the camera to the center of the bottle.
+
+We now have the position of the bottle in the image, and its distance to the camera. Using the `CameraInfo` message that we get from the camera, and ROS's `image_geometry` library, we can calculate the ray (a point that only contains angular information, and no distance information. Basically a 3D point which is at a distance of 1) from the camera to the bottle. Multiplying this point by the previously calculated depth gives us the 3D coordinates of the bottle in the frame of the camera. The image_geometry library takes care of dealing with the camera's viewing angle and distortion, and gives us far more accurate results than if we had done the trigonometry calculations by hand.
 
 The first verification that we do to filter out false alarms is to check if the size of the bottle is coherent.
 
-This process is explained in more details in the python script `bottle_detector.py`
+Note: at this point, we know how many potential bottles are currently being seen by the camera. For visualization purposes, an image with blue rectangles arround the bottles is displayed in Rviz, and the robot turns on its LED (green if there is one bottle in the image, yellow if there are two, and red if there are three of more).
+
+Lastly, the coordinates of the bottle in the frame of the camera are converted in coordinates in the frame of the map using the `TransformListener` and the transformation messages published on `/tf`
+
+This process is explained in more details in the python script `bottle_detector.py`, in the `Node` class.
 
 
-Keeping track of the bottles
-----------------------------
+Keeping track of the bottles in the map
+---------------------------------------
 
 The `Bottle` class contains all the code used to keep track of the position of the bottles.
 
-For each frame, the main class passes the list of points it found to the Bottle class. For each point, if a bottle that is very close already exists, it is updated: its coordinates are adjusted. Otherwise, it is created. A newly created bottle has to be detected and updated enough times before beeing published. It is then marked as listed. Similarily, if a bottle that is not listed is not detected for too long, it is considered as a false alarm and is destroyed, without having been published.
+For each image sent by the camera, the main class passes the list of points it found to the Bottle class. For each point, if a bottle that is close already exists, it is updated: its coordinates are adjusted by taking the average of the five last values. Otherwise, it is created. A newly created bottle has to be detected and updated enough times before it is considered to actually exist. It is then marked as listed. Similarily, if a bottle that is not listed is not detected for too long, it is considered to be a false alarm and is destroyed, without having been published.
 
-This process is explained in more details in the python script `bottle_detector.py`
+Each time a bottle is marked as listed, a new marker is sent on the `/bottle` topic to Rviz and displayed. Moreover, a sound id played by the robot. By default, when a bottle is updated, the marker is updated too, so that Rviz can display it at the correct place: it is re-published with the SAME ID, so that Rviz knows not to place a new one. If you would prefer each marker to be published only one time, you can change the `publish_updates` variable to `False` in the `bottle_detector.py` script.
 
+The distance tolerence under which a bottle is considered to already exist is fairly high, so that one bottle won't be placed several times at the same spot. So, to accomodate for two or more bottles that may be close to each other, several bottles detected in the same picture will necessarily be treated as different bottles by the program, even if they are clother to each other than the distance tolerance.
 
-Optionnal Features
-------------------
+This process is explained in more details in the python script `bottle_detector.py`, in the `Bottle` class. There, the parameters can also be modified, and an explanation of each of them is provided.
 
-1. Rviz
-
-Information is returned to rviz thanks to the `challenge2.launch` which launches rviz with the configuration saved in the file `config_ch2.rviz`. The map, the laser, the bottle markers and an image containing the detected bottles are shown.
-
-2. Shape of map 
-
-The map is fully handled by the gmapping node.
-
-3. 2d-version-bottle
-
-We trained our model with black bottles, so it only detects the black bottles. See the "Detection in the image" paragraph.
-
-4. Position of bottle
-
-We have used several technique in order to increase the precision of the bottle's position. First, we used the image_geometry library to translate the postion of the bottle in the image (in pixels) to the 3D plan of the camera, rather than doing the trigonometry calculations by ourselves. We also saved the time stamp of the image to give it back when doing the transformations and placing the marker. This way, the transformations are calculated with the tf tree of the instant where the image was taken, and there is no ambiguity, even if there is some latency due to computiong time.
-
-5. The position of the bottle is streamed one and only one time
-
-See the "Keeping track of the bottles" paragraph. Each time a bottle is detected, its position is adjusted, by taking the average of the last few positions. By default, the marker is updated so that rviz can display it at the correct place: it is re-published with the SAME ID, so it is not new marker. If you want each marker to be published only one time, you can change the `publish_updates` variable to `False` in the `bottle_detector.py` script, line 106.
-
-6. All the bottles are detected
-
-Our model works pretty well on standing bottles. Unfortunately, the second model that we tried to train for lying bottles still has trouble seeing them, but we will work on that for the challenge 3.
-
-7. Only the bottle are detected
-
-Thanks to the various filters (see the "Processing the data from the camera" paragraph and the "Keeping track of the bottles" paragraph), we've had very few false alarms in the test rosbag.
-
-8. Service
-
-In a terminal, type:
+The list of bottles can be obtained by typing the following command in a terminal:
 ```bash
 rosservice call /print_bottles
 ```
@@ -102,6 +76,29 @@ You should get an answer like
 success: True
 message: "3 bottle(s) [2.001 -0.349 0.105] [-0.09 1.545 0.114] [-1.354 -0.849 0.128] "
 ```
+
+
+Handling ROS time
+-----------------
+
+When processing the data received from the camera, we needed to make sure that we used a color and depth image that were taken at the same time, otherwise the rectangle found in the color image would not be exactly in the same spot in the depth image, especially when the robot is turning, which is a problem that we had at the beginning. To solve that, we used the `TimeSynchronizer` class from ROS's `message_filters` library. This provides a buffer the the messages we want to listen to, in our case the color image, the depth image and the camera info, and calls the callback only once three messages with the same timestamp are available.
+
+
+Avoiding the bottles when navigating
+------------------------------------
+
+The bottles are too small to be detected by the laser. That means that the robot would drive over them if they were in the middle of the arena. To prevent this from happening, the `bottle_detector.py` node continuously publishes all the listed bottles on the `bottle_obstacles` topic as a `PointCloud` message with the current timestamp. As you can see in the `costmap_common_params.yaml` parameter file, move_base listens to this topic so that the local and global planners can avoid the bottles.
+
+Note: The coordinates are converted back is the `base_footprint` frame before being sent, because move_base assumes that this topic contains sensor data, and uses raytracing to place the obstacles on the map. The origin of the frame must therefore be in the local costmap, which is why we could not use the map frame.
+
+
+Optionnal Features
+------------------
+
+4. Position of bottle
+
+We have used several technique in order to increase the precision of the bottle's position. First, we used the image_geometry library to translate the postion of the bottle in the image (in pixels) to the 3D plan of the camera, rather than doing the trigonometry calculations by ourselves. We also saved the time stamp of the image to give it back when doing the transformations and placing the marker. This way, the transformations are calculated with the tf tree of the instant where the image was taken, and there is no ambiguity, even if there is some latency due to computiong time.
+
 
 Optionnal Features
 ------------------
@@ -114,4 +111,6 @@ We trained our model with black bottles, so it only detects the black bottles. S
 
 This works in the simulation, but we still have to publish goal positions when using the real robot.
 
-Any suggestions provided by the group are welcome.
+3. Any suggestions provided by the group are welcome.
+
+All of the features that we implemented have been described in the previous paragraphs.
