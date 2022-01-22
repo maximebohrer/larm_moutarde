@@ -1,3 +1,3 @@
 # larm_moutarde
 
-Nothing to see here! Go to the [challenge3 branch](tree/challenge3)
+Nothing to see here - Please go to the [challenge3 branch](https://github.com/maximebohrer/larm_moutarde/tree/challenge3)
