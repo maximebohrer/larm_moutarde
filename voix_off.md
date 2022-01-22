@@ -13,7 +13,7 @@ Pendant la vidéo
 
 **Après que le robot ait commencé à avancer** Ici, nous avons demandé au robot de se rendre à l'autre bout de l'arène. Sur son chemin, la caméra va voir les bouteilles noires. La détection se fait grâce à la méthode de Haar : nous avons entrainé un modèle à reconnaitre ces bouteilles à l'aide d'une grande base de données d'images qui ont été prises directement avec le robot. Le capteur 3D est aussi équipé d'une caméra de profondeur. Combinées à la position des bouteilles sur l'image, ces informations nous permettent de déduire leurs coordonnées dans l'environnement. Chaque bouteille est ainsi ajoutée à une liste.
 
-**Juste avant un des signaux sonores** A chaque fois qu'une bouteille est détectée et validée, le robot émet un signal sonore **signal sonore** et un marqueur est placé sur la carte. Cette liste est d'ailleurs constamment envoyée à move_base pour permettre au robot d'éviter les bouteilles.
+**Juste avant un des signaux sonores** A chaque fois qu'une bouteille est détectée, une LED s'allume et lorsqu'elle est validée, le robot émet un signal sonore **signal sonore** et un marqueur est placé sur la carte. Cette liste est d'ailleurs constamment envoyée à move_base pour permettre au robot d'éviter les bouteilles.
 
 **Pendant le chemin du retour** Les bouteilles nouvellement détectées ne sont considérées comme valides qu'après avoir été détectées un nombre de fois suffisant. Cela permet de limiter les faux positifs. Une bouteille détectée mais déja présente dans la liste sera simplement mise à jour, ce qui permet à l'algorithme de mémoriser chaque bouteille de façon unique.
 
