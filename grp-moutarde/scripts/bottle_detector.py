@@ -64,7 +64,7 @@ class Node:
         dist = np.median(center_depth)                                  # take the median of this small rectangle to avoid beeing affected by extreme values like the background or parasites
         return dist / 1000                                              # convert millimeters to meters
 
-    # Calculates the 3D coordinates of the center of the rectangle in the camera frame
+    # Calculate the 3D coordinates of the center of the rectangle in the camera frame
     def find_center_point(self, camera_info, x, y, w, h, dist):
         cam_model = image_geometry.PinholeCameraModel()
         cam_model.fromCameraInfo(camera_info)
@@ -208,7 +208,6 @@ class Bottle:
                     msg.points.append(point.point)
                 except Exception as e:
                     print(str(e))
-
         Bottle.publisher_obstacles.publish(msg)
 
 
