@@ -1,7 +1,7 @@
 <launch>
   <arg name="simulation" default="false" />
 
-  <!-- Simulation -->
+  <!-- Simulation with Gazebo -->
   <include file="$(find larm)/launch/challenge-1.launch" if="$(arg simulation)"/>
 
   <!-- Real world -->
@@ -37,12 +37,7 @@
   args="0.2 0.0 0.05 0.0 0.0 0.0 /base_link /laser_link 80" />
 
   <!-- Gmapping -->
-  <node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=scan">
-    <!--If regions with no obstacles within the range of the sensor should appear as
-    free space in the map, set maxUrange < maximum range of the real sensor <= maxRange. -->
-    <param name="maxUrange" value="5.5" />
-    <param name="maxRange" value="5.6" />
-  </node>
+  <node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=scan" />
 
   <!-- move_base -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
@@ -71,7 +66,7 @@
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grp-moutarde)/launch/config_move_to.rviz" />
 
   <!-- Exploration -->
-  <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen" if="$(arg simulation)">
+  <node pkg="explore_lite" type="explore" respawn="false" name="explore" if="$(arg simulation)">
     <param name="robot_base_frame" value="base_link"/>
     <param name="costmap_topic" value="move_base/global_costmap/costmap"/>
     <param name="costmap_updates_topic" value="move_base/global_costmap/costmap_updates"/>

@@ -1,19 +1,43 @@
 LARM - Moutarde - Channenge 3
 =============================
 
-The goal of the challenge is to demonstrate the capability the robot has to map an environment and to retrieve specific objects on it.
+The goal of the challenge is to demonstrate the capability the robot has to map an environment, to navigate it autonomously, and to retrieve specific objects in it.
  
-/!\ The project depends on `mb6-tbot`, `AMCL`, `Move Base` and `MapServer`.
 
 à dire : grande tolérence mais si 2 bouteilles dans meme image etc
 la laser est trop haut pour les bouteilles dont on envoie dans un topic
 
-Detection in the image
-----------------------
 
-To detect the bottles in an image from the camera, we trained a cascade classifier.
+Dependencies
+------------
 
-Our model has been specically trained to recognize black bottles of Nuka Cola®. We used a cascade classifier with Local Bynary Patterns (LBP). We also generated our own large data base using the camera of the robot (intel realsense D435) to obtain images as close as possible to the images that will be seen in the rosbag or by the robot (The script we used to generate these images can be seen in `training.py`).
+The project depends on [`mb6-tbot`](https://bitbucket.org/imt-mobisyst/mb6-tbot/)
+
+The project depends on [`move_base`](http://wiki.ros.org/move_base) and [`dwa_local_planner`](http://wiki.ros.org/dwa_local_planner)
+```bash
+sudo apt install ros-noetic-move-base
+sudo apt install ros-noetic-dwa-local-planner
+```
+
+The project depends on [`explore_lite`](http://wiki.ros.org/explore_lite)
+```bash
+sudo apt install ros-noetic-explore-lite
+```
+
+Autonomous navigation
+---------------------
+
+We decided to use `move_base` from ROS' navigation stack in order for the robot to move autonomously in the arena. We also used the `dwa_local_planner` to replace move_base's default local planner as it works way better in our experience. We configured the global planner so that you can make the robot explore unknown areas, and it will adjust its path along the way as it detects new walls and obstacles. That way, you can make the robot explore its environment easily by sending it goals through Rviz, even if it does not know the map yet.
+
+`explore_lite` is a ROS package that works with move_base. It determines the best goal to go explore in order to map the environment in the most efficient way possible. The goals are sent to move_base and the robot keeps exploring until the whole environment has been mapped. As you will see, it works really well in the simulation, but we had trouble making it work in small cluttered places like the arena. That is why we only enabled it for the simulation.
+
+
+Detection of the bottles in the image
+-------------------------------------
+
+To detect the bottles in an image from the camera, we trained a Haar cascade classifier.
+
+Our model has been specically trained to recognize black bottles of Nuka Cola®. We used a Haar cascade classifier with Local Bynary Patterns (LBP). We trained the model using our own large data base containing about 200 positive images and 400 negative images that we took directly using the camera of the robot (intel realsense D435) to obtain images as close as possible to the images that will be seen by the robot (The script we used to generate these images can be seen in `training.py`).
 
 
 Processing the data from the camera
@@ -73,8 +97,21 @@ In a terminal, type:
 ```bash
 rosservice call /print_bottles
 ```
-You shold get an answer like
+You should get an answer like
 ```
 success: True
 message: "3 bottle(s) [2.001 -0.349 0.105] [-0.09 1.545 0.114] [-1.354 -0.849 0.128] "
 ```
+
+Optionnal Features
+------------------
+
+1. The robot detect 2d-version-bottle (black one).
+
+We trained our model with black bottles, so it only detects the black bottles. See the "Detection in the image" paragraph.
+
+2. There is no need to publish goal positions. The robot is autonomous to achieve its mission.
+
+This works in the simulation, but we still have to publish goal positions when using the real robot.
+
+Any suggestions provided by the group are welcome.
