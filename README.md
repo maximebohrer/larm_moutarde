@@ -3,6 +3,8 @@ LARM - Moutarde - Challenge 3
 
 The goal of the challenge is to demonstrate the capability the robot has to map an environment, to navigate it autonomously, and to retrieve specific objects in it.
 
+<img src="images/robot.jpg" width="500"/>
+
 
 Dependencies
 ------------
@@ -29,6 +31,8 @@ The global costmap is generated using gmapping's map. The obstacles are inflated
 
 `explore_lite` is a ROS package that works with move_base. It determines the best goal to go explore in order to map the environment in the most efficient way possible. The goals are sent to move_base and the robot keeps exploring until the whole environment has been mapped. As you will see, it works really well in the simulation, but we had trouble making it work in small cluttered places like the arena. That is why we only enabled it for the simulation.
 
+<img src="images/move_base.png" width="500"/>
+
 
 Detection of the bottles in the image
 -------------------------------------
@@ -36,6 +40,8 @@ Detection of the bottles in the image
 To detect the bottles in an image from the camera, we trained a Haar cascade classifier.
 
 Our model has been specically trained to recognize black bottles of Nuka Cola®. We used a Haar cascade classifier with Local Bynary Patterns (LBP). We trained the model using our own large data base containing about 200 positive images and 400 negative images that we took directly using the camera of the robot (intel realsense D435) to obtain images as close as possible to the images that will be seen by the robot (The script we used to generate these images can be seen in `training.py`). We tried a lot of different parameters, but our first attempt is the one that ended up working best.
+
+<img src="images/bottle.jpg" height="200"/> <img src="images/pos.png" height="200"/> <img src="images/neg.png" height="200"/>
 
 
 Processing the data from the camera
@@ -76,6 +82,8 @@ You should get an answer like
 success: True
 message: "3 bottle(s) [2.001 -0.349 0.105] [-0.09 1.545 0.114] [-1.354 -0.849 0.128] "
 ```
+
+<img src="images/map_bottles.png" width="500"/>
 
 
 Handling ROS time
