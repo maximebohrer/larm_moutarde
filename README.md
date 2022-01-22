@@ -1,4 +1,4 @@
-LARM - Moutarde - Channenge 3
+LARM - Moutarde - Challenge 3
 =============================
 
 The goal of the challenge is to demonstrate the capability the robot has to map an environment, to navigate it autonomously, and to retrieve specific objects in it.
@@ -35,7 +35,7 @@ Detection of the bottles in the image
 
 To detect the bottles in an image from the camera, we trained a Haar cascade classifier.
 
-Our model has been specically trained to recognize black bottles of Nuka Cola®. We used a Haar cascade classifier with Local Bynary Patterns (LBP). We trained the model using our own large data base containing about 200 positive images and 400 negative images that we took directly using the camera of the robot (intel realsense D435) to obtain images as close as possible to the images that will be seen by the robot (The script we used to generate these images can be seen in `training.py`).
+Our model has been specically trained to recognize black bottles of Nuka Cola®. We used a Haar cascade classifier with Local Bynary Patterns (LBP). We trained the model using our own large data base containing about 200 positive images and 400 negative images that we took directly using the camera of the robot (intel realsense D435) to obtain images as close as possible to the images that will be seen by the robot (The script we used to generate these images can be seen in `training.py`). We tried a lot of different parameters, but our first attempt is the one that ended up working best.
 
 
 Processing the data from the camera
@@ -83,6 +83,8 @@ Handling ROS time
 
 When processing the data received from the camera, we needed to make sure that we used a color and depth image that were taken at the same time, otherwise the rectangle found in the color image would not be exactly in the same spot in the depth image, especially when the robot is turning, which is a problem that we had at the beginning. To solve that, we used the `TimeSynchronizer` class from ROS's `message_filters` library. This provides a buffer the the messages we want to listen to, in our case the color image, the depth image and the camera info, and calls the callback only once three messages with the same timestamp are available.
 
+When doing the transformation from the camera frame to the map frame, we use a `PointStamped` object with the same timestamp as the image. That way, even even if the reception of the messages or the computation takes time, and even if the robot has already moved by the time the point has been calculated, the transformed point will still have accurate coordinates. This is thanks to the `TransformListener` which provades a small buffer for the `/tf` transforms, and is able to lookup for transformations in the past.
+
 
 Avoiding the bottles when navigating
 ------------------------------------
@@ -90,14 +92,6 @@ Avoiding the bottles when navigating
 The bottles are too small to be detected by the laser. That means that the robot would drive over them if they were in the middle of the arena. To prevent this from happening, the `bottle_detector.py` node continuously publishes all the listed bottles on the `bottle_obstacles` topic as a `PointCloud` message with the current timestamp. As you can see in the `costmap_common_params.yaml` parameter file, move_base listens to this topic so that the local and global planners can avoid the bottles.
 
 Note: The coordinates are converted back is the `base_footprint` frame before being sent, because move_base assumes that this topic contains sensor data, and uses raytracing to place the obstacles on the map. The origin of the frame must therefore be in the local costmap, which is why we could not use the map frame.
-
-
-Optionnal Features
-------------------
-
-4. Position of bottle
-
-We have used several technique in order to increase the precision of the bottle's position. First, we used the image_geometry library to translate the postion of the bottle in the image (in pixels) to the 3D plan of the camera, rather than doing the trigonometry calculations by ourselves. We also saved the time stamp of the image to give it back when doing the transformations and placing the marker. This way, the transformations are calculated with the tf tree of the instant where the image was taken, and there is no ambiguity, even if there is some latency due to computiong time.
 
 
 Optionnal Features

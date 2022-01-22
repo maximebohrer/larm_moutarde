@@ -63,7 +63,7 @@
   </node>
 
   <!-- Rviz -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grp-moutarde)/launch/config_move_to.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grp-moutarde)/launch/config_rviz.rviz" />
 
   <!-- Exploration -->
   <node pkg="explore_lite" type="explore" respawn="false" name="explore" if="$(arg simulation)">
