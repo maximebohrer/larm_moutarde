@@ -9,7 +9,7 @@ Bonjour à tous, dans cette vidéo, nous allons vous présenter notre projet ré
 Pendant la vidéo
 ----------------
 
-**Pendant qu'on choisis la position sur Rviz** La cartographie est réalisée avec gmapping, un algorithme qui crée une carte de l'environnement à partir des données du laser, et qui localise le robot dessus. Le déplacement se fait ensuite avec move_base, un package à qui l'on peut donner une position, et qui va déterminer le meilleur chemin possible pour y arriver en évitant les obstacles, et qui se charge d'envoyer les commandes de vitesse adéquates au robot.
+**Pendant qu'on choisis la position sur Rviz** La cartographie est réalisée avec gmapping, un algorithme qui crée une carte de l'environnement à partir des données du laser, et qui localise le robot dessus. Le déplacement se fait ensuite avec move_base, un package à qui l'on peut donner une position, qui va déterminer le meilleur chemin possible pour y arriver en évitant les obstacles, et qui se charge d'envoyer les commandes de vitesse adéquates au robot.
 
 **Après que le robot a commencé à avancer** Ici, nous avons demandé au robot de se rendre à l'autre bout de l'arène. Sur son chemin, la caméra va voir les bouteilles noires. La détection se fait grâce à la méthode de Haar : nous avons entrainé un modèle à reconnaitre ces bouteilles à l'aide d'une grande base de données d'images qui ont été prises directement avec le robot. La détection se fait ensuite avec OpenCV et python. Le capteur 3D est aussi équipé d'une caméra de profondeur. Combinées à la position des bouteilles sur l'image, ces informations nous permettent de déduire leurs coordonnées dans l'environnement. Chaque bouteille est ainsi ajoutée à une liste.
 
@@ -42,4 +42,4 @@ Pas besoin de parler
 Conclusion
 ----------
 
-Merci d'avoir regardé, à bientôt
+Voilà pour ce résumé de notre projet de robotique. Merci d'avoir regardé

@@ -1,7 +1,7 @@
 LARM - Moutarde - Challenge 3
 =============================
 
-The goal of the challenge is to demonstrate the capability the robot has to map an environment, to navigate it autonomously, and to retrieve specific objects in it.
+The goal of the challenge is to demonstrate the capability the robot has to map an environment, to navigate it autonomously, and to retrieve specific objects in it. You can find explanations and a demonstration in the [youtube video]().
 
 <img src="images/robot.jpg" width="500"/>
 
